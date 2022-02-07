@@ -1,1 +1,1 @@
-from .core import AlphacodersPage
+from .core import directLinkCore
