@@ -1,18 +1,53 @@
+import functools
+from pydoc import getpager
 from bs4 import BeautifulSoup
 import requests
 import time
 import os
-from common import HEARDERS
+from .common import HEARDERS
+import re
+import math
+
+
+def toHtml(text):
+    return BeautifulSoup(text, 'html.parser')
+
+
+def getRequestBs4(url, params):
+    data = requests.get(
+        url=url,
+        params=params,
+        headers=HEARDERS
+    )
+    if data.status_code == 200:
+        return toHtml(data.text)
+    else:
+        raise Exception('错误，网络错误码%d', data.status_code)
 
 
 class directLinkCore:
     imgList = []
     num = 0
+    currentPage = 1
+    maxPage = 0
 
     def __init__(self) -> None:
         pass
 
-    def addList(self, imgURL, name, type='png'):
+    def getMaxPage(self):
+        '''返回最大页数'''
+        return self.maxPage
+
+    def getNum(self):
+        '''返回链接数'''
+        return self.num
+
+    def clearList(self):
+        '''清空list列表'''
+        self.imgList = []
+        self.num = 0
+
+    def _addList(self, imgURL, name, type='png'):
         self.imgList.append({
             "url": imgURL,
             "name": str(name),
@@ -20,11 +55,12 @@ class directLinkCore:
         })
         self.num = self.num + 1
 
-    def clearList(self):
-        self.imgList = []
-        self.num = 0
-
     def save(self, path, over_save=False):
+        '''
+        console方式保存 单线程 显示进度条\n
+        path 保存的地址\n
+        over_save=False 如果存在文件 是否覆盖
+        '''
         if over_save:
             for i in range(self.num):
                 download(
@@ -54,23 +90,38 @@ class AlphacodersPage(directLinkCore):
 
     def __init__(self, keyWord) -> None:
         self.keyWord = keyWord
-        data = requests.get(
-            url=self.searchURL,
-            params={
-                "search": self.keyWord
-            },
-            headers=HEARDERS
-        )
-        if not data.status_code == 200:
-            return data.status_code
-        html = BeautifulSoup(data.text, 'html.parser')
-        spanList = html.find_all('span', {"title": "Download Wallpaper"})
+        self._getPageMax()
 
+    def _getPageMax(self):
+        html = getRequestBs4(url=self.searchURL, params={
+                             "search": self.keyWord})
+        num = html.find('h1', {"class": "center title"})
+        for i in num.text.split(' '):
+            if i.isnumeric():
+                self.maxPage = (math.ceil(int(i) / 30))
+
+    def _getUrl(self):
+        html = getRequestBs4(url=self.searchURL, params={
+                             "search": self.keyWord, "page": self.currentPage, "quickload": self.currentPage})
+        self.currentPage = self.currentPage + 1
+        spanList = html.find_all('span', {"title": "Download Wallpaper"})
         for i in spanList:
-            self.addList(
+            self._addList(
                 "https://initiate.alphacoders.com/download/wallpaper/%s/%s/%s/"
                 % (str(i['data-id']), i['data-server'], i['data-type']), i['data-id'], i['data-type']
             )
+        return self.currentPage <= self.maxPage
+
+    def whileGetUrl(self, func=None):
+        '''
+        循环页数链接获取主函数\n
+        func参数格式\n
+        func(currentPage, maxPage)
+        '''
+        self.currentPage = 1
+        while(self._getUrl()):
+            if not func is None:
+                func(self.currentPage, self.maxPage)
 
 
 def download(url, path):
@@ -97,4 +148,3 @@ def download(url, path):
         print('Download completed!,times: %.2f秒' % (end - start))  # 输出下载用时时间
     except:
         print("Exception occurs in Downloading...")
-
