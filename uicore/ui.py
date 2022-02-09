@@ -1,11 +1,14 @@
-from PyQt5.QtWidgets import (QWidget, QPushButton, QApplication, QFormLayout, QLabel, QLineEdit, QTextEdit, QTextBrowser, QToolButton, QHBoxLayout, QVBoxLayout, QCheckBox, QProgressBar)
+from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel,
+                             QLineEdit, QTextBrowser, QToolButton, QHBoxLayout, QVBoxLayout)
+
+
 class UI(QWidget):
     # def __init__(self):
     #     super().__init__()
     #     self.Init_UI()
     #     self.Init_Button()
     #     self.show()
-        
+
     def Init_UI(self, MainWindow):
         # self.setGeometry(300,300,300,200)
         MainWindow.setWindowTitle('图片爬虫')
@@ -28,14 +31,11 @@ class UI(QWidget):
         savepathLayout.addWidget(QLabel("保存地址:"))
         savepathLayout.addWidget(self.savepathLine)
         savepathLayout.addWidget(self.savepathButton)
-        
 
         # engine layout
         self.engineLayout = QHBoxLayout()
         self.engineLayout.addWidget(QLabel('引擎:'))
-            
 
- 
         # start layout
         self.startButton = QPushButton('开始')
         self.startButton.setEnabled(False)
@@ -53,5 +53,5 @@ class UI(QWidget):
         self.formLayout.addLayout(self.engineLayout)
         self.formLayout.addWidget(self.textBrowser)
         self.formLayout.addLayout(startLayout)
-        
+
         MainWindow.setLayout(self.formLayout)

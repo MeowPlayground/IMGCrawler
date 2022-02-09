@@ -1,5 +1,3 @@
-from importlib.resources import path
-from itertools import count
 import requests
 import os
 from bs4 import BeautifulSoup
@@ -12,7 +10,7 @@ class DirectLinkCore:
     imgList = []
     num = 0
     currentPage = 0
-    currentNum = [0]
+    currentNum = [0, 0]
     maxPage = 0
     keyword = ''
 
@@ -100,12 +98,16 @@ class DirectLinkCore:
             
 
 
-    def save(self, path, _download):
+    def save(self, path, eList, _download):
         """
         console方式保存 单线程 显示进度条\n
         path 保存的地址\n
         """
+        # 搜索线程已退出
+        eList[0] = 0
         for j in range(3):
             t = Thread(target=self._3threadDownload, args=(j, _download, path))
             t.setDaemon(True)
             t.start()
+        eList[1] = 3
+        # 三个下载线程

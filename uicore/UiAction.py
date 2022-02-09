@@ -1,12 +1,13 @@
 #coding = 'utf-8'
-import sys
 from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QWidget
+from PyQt5.QtWidgets import QApplication, QWidget
 from functools import partial
+from PyQt5.QtGui import QIcon
 
 from .action import Action
 from .ui import UI
 from .common import *
+import uicore.window_icon
 
 
 class MySignals(QObject):
@@ -21,6 +22,7 @@ class MySignals(QObject):
     progressBar_setRange = pyqtSignal(int, int, int)
     progressBar_setValue = pyqtSignal(int, int)
 
+
 class MainWindow(QWidget):
     def __init__(self):
         # 从文件中加载UI定义
@@ -34,7 +36,6 @@ class MainWindow(QWidget):
         self.action = Action(signal=signals, ui=self)
         self.action.init_engine()
         self.Init_Button()
-        
 
     def Init_Button(self):
         """
@@ -46,7 +47,7 @@ class MainWindow(QWidget):
         self.ui.savepathButton.clicked.connect(self.action.setSavepath)
         for i in self.action.checkBoxList:
             i.clicked.connect(partial(self.action.progressShow, i))
-        
+
         signals.progressBar_setHide.connect(self.action.progressBar_setHide)
         signals.progressBar_setRange.connect(self.action.progressBar_setRange)
         signals.progressBar_setValue.connect(self.action.progressBar_setValue)
@@ -56,7 +57,6 @@ class MainWindow(QWidget):
         signals.engine_setChecked.connect(self.engine_setChecked)
         signals.engine_enable.connect(self.engine_enable)
 
-    
     def print(self, t):
         """
         text browser 打印函数
@@ -93,3 +93,4 @@ class MainWindow(QWidget):
 app = QApplication([])
 signals = MySignals()
 mainw = MainWindow()
+mainw.setWindowIcon(QIcon(':/icon.ico'))
