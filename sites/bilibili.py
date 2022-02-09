@@ -2,17 +2,16 @@ from webcore import directLinkCore
 import os
 
 class BilibiliPage(directLinkCore):
-    def __init__(self, keyWord, searchURL = 'https://search.bilibili.com/article') -> None:
-        self.keyWord = keyWord
+    name = 'Bilibili'
+    def __init__(self, searchURL = 'https://search.bilibili.com/article') -> None:
         self.searchURL = searchURL
-        self._getPageMax()
 
     def _getPageMax(self):
         '''
         获取页面数量
         '''
         html = self._getRequestBs4(url=self.searchURL, params={
-                             "keyword": self.keyWord})
+                             "keyword": self.keyword})
         page = html.find(class_="pages")
         # 对页面请求，得到bs4页面
         if page is None:

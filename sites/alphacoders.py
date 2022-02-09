@@ -2,14 +2,13 @@ from webcore import directLinkCore
 import math
 
 class AlphacodersPage(directLinkCore):
-    def __init__(self, keyWord, searchURL = 'https://wall.alphacoders.com/search.php') -> None:
-        self.keyWord = keyWord
+    name = 'Alphacoders'
+    def __init__(self, searchURL = 'https://wall.alphacoders.com/search.php') -> None:
         self.searchURL = searchURL
-        self._getPageMax()
 
     def _getPageMax(self):
         html = self._getRequestBs4(url=self.searchURL, params={
-                             "search": self.keyWord})
+                             "search": self.keyword})
         num = html.find('h1', {"class": "center title"})
         for i in num.text.split(' '):
             if i.isnumeric():
@@ -17,7 +16,7 @@ class AlphacodersPage(directLinkCore):
 
     def _getUrlFormPage(self):
         html = self._getRequestBs4(url=self.searchURL, params={
-                             "search": self.keyWord, "page": self.currentPage, "quickload": self.currentPage})
+                             "search": self.keyword, "page": self.currentPage, "quickload": self.currentPage})
         self.currentPage = self.currentPage + 1
         spanList = html.find_all('span', {"title": "Download Wallpaper"})
         for i in spanList:

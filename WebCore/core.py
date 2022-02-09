@@ -1,10 +1,7 @@
 import requests
 import os
 from bs4 import BeautifulSoup
-from .common import HEARDERS, download
-
-
-
+from .common import HEADERS, download
 
 
 class directLinkCore:
@@ -12,21 +9,24 @@ class directLinkCore:
     num = 0
     currentPage = 1
     maxPage = 0
+    keyword = ''
 
     def __init__(self) -> None:
         pass
     
-    
+    def setKeyword(self, k):
+        self.keyword = k
+        
     def _getRequestBs4(self, url, params={}):
         data = requests.get(
             url=url,
             params=params,
-            headers=HEARDERS
+            headers=HEADERS
         )
         if data.status_code == 200:
             return self._toHtml(data.text)
         else:
-            raise Exception('错误，网络错误码%d', data.status_code)
+            raise Exception('网络错误码%d' % data.status_code)
 
     def _toHtml(self, text):
         return BeautifulSoup(text, 'html.parser')
