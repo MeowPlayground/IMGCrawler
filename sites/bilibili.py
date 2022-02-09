@@ -1,12 +1,13 @@
-from webcore import directLinkCore
+from webcore import DirectLinkCore
 import os
 
-class BilibiliPage(directLinkCore):
-    name = 'Bilibili'
+class BilibiliPage(DirectLinkCore):
+    
     def __init__(self, searchURL = 'https://search.bilibili.com/article') -> None:
         self.searchURL = searchURL
+        self.setName('Bilibili')
 
-    def _getPageMax(self):
+    def getPageMax(self):
         '''
         获取页面数量
         '''
@@ -27,11 +28,12 @@ class BilibiliPage(directLinkCore):
 
 
     def _getUrlFormPage(self):
+        self.currentPage = self.currentPage + 1
         if self.maxPage < 1:
             return False
 
         html = self._getRequestBs4(url=self.searchURL, params={
-                             "keyword": self.keyWord, "page": self.currentPage})
+                             "keyword": self.keyword, "page": self.currentPage})
 
         # 请求页面
 
@@ -58,7 +60,5 @@ class BilibiliPage(directLinkCore):
                     name=name.split('.')[-2],
                     _type=name.split('.')[-1]
                 )
-                print(name.split('.')[-2], name.split('.')[-1])
-        self.currentPage = self.currentPage + 1
-        return self.currentPage <= self.maxPage
+        return self.currentPage < self.maxPage
             

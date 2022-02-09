@@ -1,23 +1,30 @@
+from importlib.resources import path
+from itertools import count
 import requests
 import os
 from bs4 import BeautifulSoup
-from .common import HEADERS, download
+from .common import HEADERS
+from threading import Thread
 
 
-class directLinkCore:
+class DirectLinkCore:
+    name = ''
     imgList = []
     num = 0
-    currentPage = 1
+    currentPage = 0
+    currentNum = [0]
     maxPage = 0
     keyword = ''
 
+
     def __init__(self) -> None:
         pass
-    
+
     def setKeyword(self, k):
         self.keyword = k
-        
-    def _getRequestBs4(self, url, params={}):
+    def setName(self, name):
+        self.name = name
+    def _getRequestBs4(self, url, params=None):
         data = requests.get(
             url=url,
             params=params,
@@ -39,16 +46,17 @@ class directLinkCore:
         self.imgList = tempList[:]
 
     def getMaxPage(self):
-        '''返回最大页数'''
+        """返回最大页数"""
         return self.maxPage
 
     def getNum(self):
-        '''返回链接数'''
+        """返回链接数"""
         return self.num
 
     def clearList(self):
-        '''清空list列表'''
+        """清空list列表"""
         self.imgList = []
+        self.maxPage = 0
         self.num = 0
 
     def _addList(self, imgURL, name, _type='png'):
@@ -59,49 +67,45 @@ class directLinkCore:
         })
         self.num = self.num + 1
 
-    
     def whileGetUrl(self, func=None):
-        '''
+        """
         循环页数链接获取主函数\n
         func参数格式\n
         func(currentPage, maxPage)
-        '''
-        self.currentPage = 1
-        while(self._getUrlFormPage()):
+        """
+        self.currentPage = 0
+        while self._getUrlFormPage():
             if not func is None:
-                func(self.currentPage, self.maxPage)
-    
-    def _getUrlFormPage():
-        '''
+                func(self.currentPage)
+
+    def _getUrlFormPage(self):
+        """
         子类中重写该方法
-        '''
+        """
         return False
-    
-    def save(self, path, over_save=False):
-        '''
+        
+    def _3threadDownload(self, th, _download, path):
+        for i in range(th, self.num, 3):
+            name = self.imgList[i]['name']
+            ntype = self.imgList[i]['type']
+            targetPath = os.path.join(path, name + '.' + ntype)
+            if os.path.exists(targetPath):
+                q = 1
+                while os.path.exists(os.path.join(path, name + '_' + str(q) + '.' + ntype)):
+                    q = q + 1
+                targetPath = os.path.join(
+                    path, name + '_' + str(q) + '.' + ntype)
+            if _download(self.imgList[i]['url'], targetPath, self.currentNum, self.name) == -1:
+                return
+            
+
+
+    def save(self, path, _download):
+        """
         console方式保存 单线程 显示进度条\n
         path 保存的地址\n
-        over_save=False 如果存在文件 是否覆盖
-        '''
-        if over_save:
-            for i in range(self.num):
-                download(
-                    self.imgList[i]['url'],
-                    os.path.join(
-                        path, self.imgList[i]['name'] + '.' + self.imgList[i]['type'])
-                )
-        else:
-            for i in range(self.num):
-                name = self.imgList[i]['name']
-                ntype = self.imgList[i]['type']
-                targePath = os.path.join(path, name + '.' + ntype)
-                if os.path.exists(targePath):
-                    q = 1
-                    while(os.path.exists(os.path.join(path, name + '_' + str(q) + '.' + ntype))):
-                        q = q + 1
-                    targePath = os.path.join(
-                        path, name + '_' + str(q) + '.' + ntype)
-                download(
-                    self.imgList[i]['url'],
-                    targePath
-                )
+        """
+        for j in range(3):
+            t = Thread(target=self._3threadDownload, args=(j, _download, path))
+            t.setDaemon(True)
+            t.start()

@@ -1,8 +1,8 @@
 #coding = 'utf-8'
-
 import sys
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QWidget
+from functools import partial
 
 from .action import Action
 from .ui import UI
@@ -13,11 +13,13 @@ class MySignals(QObject):
     # 定义一种信号，两个参数 类型分别是： QTextBrowser 和 字符串
     # 调用 emit方法 发信号时，传入参数 必须是这里指定的 参数类型
     print = pyqtSignal(str)
-    update_pb = pyqtSignal(int)
-    update_range = pyqtSignal(int)
+
     button_set = pyqtSignal(int)
     engine_setChecked = pyqtSignal(int, bool)
-    engine_setCheckable = pyqtSignal(int, bool)
+    engine_enable = pyqtSignal(bool)
+    progressBar_setHide = pyqtSignal(int, bool)
+    progressBar_setRange = pyqtSignal(int, int, int)
+    progressBar_setValue = pyqtSignal(int, int)
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -35,27 +37,39 @@ class MainWindow(QWidget):
         
 
     def Init_Button(self):
-        '''
+        """
             初始化所有的按钮的信号与槽
-        '''
+        """
         self.ui.searchButton.clicked.connect(self.action.search)
         self.ui.startButton.clicked.connect(self.action.start)
         self.ui.stopButton.clicked.connect(self.action.stop)
+        self.ui.savepathButton.clicked.connect(self.action.setSavepath)
+        for i in self.action.checkBoxList:
+            i.clicked.connect(partial(self.action.progressShow, i))
+        
+        signals.progressBar_setHide.connect(self.action.progressBar_setHide)
+        signals.progressBar_setRange.connect(self.action.progressBar_setRange)
+        signals.progressBar_setValue.connect(self.action.progressBar_setValue)
+
         signals.button_set.connect(self.button_set)
         signals.print.connect(self.print)
         signals.engine_setChecked.connect(self.engine_setChecked)
+        signals.engine_enable.connect(self.engine_enable)
 
     
     def print(self, t):
-        '''
+        """
         text browser 打印函数
-        '''
+        """
         self.ui.textBrowser.append(str(t))
         self.ui.textBrowser.ensureCursorVisible()
 
     def engine_setChecked(self, n, v):
         self.action.checkBoxList[n].setChecked(v)
 
+    def engine_enable(self, b):
+        for i in self.action.checkBoxList:
+            i.setEnabled(b)
 
     def button_set(self, n):
         if n == SEARCH_ENABLE:
@@ -68,9 +82,9 @@ class MainWindow(QWidget):
             self.ui.savepathButton.setEnabled(True)
         elif n == SEARCH_DISABLE:
             self.ui.searchButton.setEnabled(False)
-        elif n == SAVE_DISABLE:
-            self.ui.startButton.setEnabled(False)
         elif n == START_DISABLE:
+            self.ui.startButton.setEnabled(False)
+        elif n == STOP_DISABLE:
             self.ui.stopButton.setEnabled(False)
         elif n == SAVE_DISABLE:
             self.ui.savepathButton.setEnabled(False)

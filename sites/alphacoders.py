@@ -1,12 +1,13 @@
-from webcore import directLinkCore
+from webcore import DirectLinkCore
 import math
 
-class AlphacodersPage(directLinkCore):
-    name = 'Alphacoders'
+class AlphacodersPage(DirectLinkCore):
+    
     def __init__(self, searchURL = 'https://wall.alphacoders.com/search.php') -> None:
         self.searchURL = searchURL
+        self.setName('Alphacoders')
 
-    def _getPageMax(self):
+    def getPageMax(self):
         html = self._getRequestBs4(url=self.searchURL, params={
                              "search": self.keyword})
         num = html.find('h1', {"class": "center title"})
@@ -15,13 +16,14 @@ class AlphacodersPage(directLinkCore):
                 self.maxPage = (math.ceil(int(i) / 30))
 
     def _getUrlFormPage(self):
+        self.currentPage = self.currentPage + 1
         html = self._getRequestBs4(url=self.searchURL, params={
                              "search": self.keyword, "page": self.currentPage, "quickload": self.currentPage})
-        self.currentPage = self.currentPage + 1
+        
         spanList = html.find_all('span', {"title": "Download Wallpaper"})
         for i in spanList:
             self._addList(
                 "https://initiate.alphacoders.com/download/wallpaper/%s/%s/%s/"
                 % (str(i['data-id']), i['data-server'], i['data-type']), i['data-id'], i['data-type']
             )
-        return self.currentPage <= self.maxPage
+        return self.currentPage < self.maxPage

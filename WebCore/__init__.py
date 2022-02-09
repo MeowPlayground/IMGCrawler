@@ -1,1 +1,1 @@
-from .core import directLinkCore
+from .core import DirectLinkCore
