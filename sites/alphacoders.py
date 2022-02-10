@@ -1,3 +1,4 @@
+from socket import timeout
 from webcore import DirectLinkCore
 import math
 

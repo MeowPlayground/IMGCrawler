@@ -17,6 +17,7 @@ class UI(QWidget):
         # search layout
         self.keywordLine = QLineEdit()
         self.searchButton = QPushButton('搜索')
+        self.searchButton.setEnabled(False)
 
         searchLayout = QHBoxLayout()
         searchLayout.addWidget(QLabel("关键词:"))
@@ -25,6 +26,7 @@ class UI(QWidget):
 
         # savepath layout
         self.savepathLine = QLineEdit()
+        self.savepathLine.setEnabled(False)
         self.savepathButton = QToolButton()
         self.savepathButton.setText('...')
         savepathLayout = QHBoxLayout()

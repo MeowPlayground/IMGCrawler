@@ -26,7 +26,8 @@ class DirectLinkCore:
         data = requests.get(
             url=url,
             params=params,
-            headers=HEADERS
+            headers=HEADERS,
+            timeout=(5, 20)
         )
         if data.status_code == 200:
             return self._toHtml(data.text)
@@ -75,6 +76,7 @@ class DirectLinkCore:
         while self._getUrlFormPage():
             if not func is None:
                 func(self.currentPage)
+        func(self.currentPage)
 
     def _getUrlFormPage(self):
         """
@@ -83,6 +85,9 @@ class DirectLinkCore:
         return False
         
     def _3threadDownload(self, th, _download, path):
+        """
+        该函数将作为1个单独的线程运行
+        """
         for i in range(th, self.num, 3):
             name = self.imgList[i]['name']
             ntype = self.imgList[i]['type']
@@ -109,5 +114,7 @@ class DirectLinkCore:
             t = Thread(target=self._3threadDownload, args=(j, _download, path))
             t.setDaemon(True)
             t.start()
-        eList[1] = 3
+
         # 三个下载线程
+        eList[1] = 3
+        

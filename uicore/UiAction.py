@@ -1,4 +1,5 @@
 #coding = 'utf-8'
+from tkinter.messagebox import NO
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QWidget
 from functools import partial
@@ -34,7 +35,6 @@ class MainWindow(QWidget):
         self.ui = UI()
         self.ui.Init_UI(self)
         self.action = Action(signal=signals, ui=self)
-        self.action.init_engine()
         self.Init_Button()
 
     def Init_Button(self):
@@ -45,6 +45,8 @@ class MainWindow(QWidget):
         self.ui.startButton.clicked.connect(self.action.start)
         self.ui.stopButton.clicked.connect(self.action.stop)
         self.ui.savepathButton.clicked.connect(self.action.setSavepath)
+
+        self.ui.keywordLine.textChanged.connect(self.action.keywordTextChanged)
         for i in self.action.checkBoxList:
             i.clicked.connect(partial(self.action.progressShow, i))
 
@@ -73,7 +75,8 @@ class MainWindow(QWidget):
 
     def button_set(self, n):
         if n == SEARCH_ENABLE:
-            self.ui.searchButton.setEnabled(True)
+            if not (self.ui.keywordLine.text() == "" or self.ui.keywordLine.text() is None):
+                self.ui.searchButton.setEnabled(True)
         elif n == START_ENABLE:
             self.ui.startButton.setEnabled(True)
         elif n == STOP_ENABLE:
@@ -88,6 +91,10 @@ class MainWindow(QWidget):
             self.ui.stopButton.setEnabled(False)
         elif n == SAVE_DISABLE:
             self.ui.savepathButton.setEnabled(False)
+        elif n == KEYWORDLINE_ENABLE:
+            self.ui.keywordLine.setEnabled(True)
+        elif n == KEYWORDLINE_DISABLE:
+            self.ui.keywordLine.setEnabled(False)
 
 
 app = QApplication([])
