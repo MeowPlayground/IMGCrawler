@@ -3,14 +3,14 @@ import os
 from bs4 import BeautifulSoup
 from .common import HEADERS
 from threading import Thread
-
+import time
 
 class DirectLinkCore:
     name = ''
     imgList = []
     num = 0
     currentPage = 0
-    currentNum = [0, 0]
+    currentNum = 0
     maxPage = 0
     keyword = ''
 
@@ -98,10 +98,11 @@ class DirectLinkCore:
                     q = q + 1
                 targetPath = os.path.join(
                     path, name + '_' + str(q) + '.' + ntype)
-            if _download(self.imgList[i]['url'], targetPath, self.currentNum, self.name) == -1:
+            if _download(self.imgList[i]['url'], targetPath, self.name, self.currentNum ,self._currentPass) == -1:
                 return
             
-
+    def _currentPass(self):
+        self.currentNum = self.currentNum + 1
 
     def save(self, path, eList, _download):
         """
@@ -110,11 +111,18 @@ class DirectLinkCore:
         """
         # 搜索线程已退出
         eList[0] = 0
+        t_list = []
         for j in range(3):
             t = Thread(target=self._3threadDownload, args=(j, _download, path))
             t.setDaemon(True)
             t.start()
+            t_list.append(t)
+
+        eList[1] = 3
+        for i in t_list:
+            while(i.is_alive()):
+                time.sleep(1)
 
         # 三个下载线程
-        eList[1] = 3
+        
         

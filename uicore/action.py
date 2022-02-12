@@ -114,8 +114,7 @@ class Action:
         储存位置设置函数
         绑定按钮
         """
-        self.savepath = QFileDialog.getExistingDirectory()
-        self.ui.savepathLine.setText(self.savepath)
+        self.ui.savepathLine.setText(QFileDialog.getExistingDirectory())
 
     def search(self):
         """
@@ -197,7 +196,9 @@ class Action:
         # 清除停止Flasg
         self.stopFlag = False
 
-        # 检查一下savepath有没有被设置了，
+        # 获取文本框内的text
+        self.savepath = self.ui.savepathLine.text()
+        # 检查一下savepath有没有被设置了
         if self.savepath == '' or self.savepath is None or (not os.path.exists(self.savepath)):
             self._print('地址%s不存在' % self.savepath)
             return
@@ -240,16 +241,17 @@ class Action:
 
         # 合成当前引擎的目录
         # 保存目录 + 关键词和引擎名
+        
         path = os.path.join(self.savepath, self.keyword +
-                            '-' + self.engineList[i].name)
+                            '_' + self.engineList[i].name)
 
         # 如果存在了这个目录，进行文件夹名后面增加 _? 的操作来避免重名
         if os.path.exists(path):
             k = 1
-            while os.path.exists(os.path.join(self.savepath, self.keyword + '-' + self.engineList[i].name) + '_' + str(k)):
+            while os.path.exists(os.path.join(self.savepath, self.keyword + '_' + self.engineList[i].name) + '_' + str(k)):
                 k = k + 1
             path = os.path.join(self.savepath, self.keyword +
-                                '-' + self.engineList[i].name + '_' + str(k))
+                                '_' + self.engineList[i].name + '_' + str(k))
         os.makedirs(path)
         self._print('创建目录%s' % path)
 
@@ -323,14 +325,17 @@ class Action:
         except Exception as e:
             self._print(str(e))
 
-    def _download(self, url, path, count, name):
+    def _download(self, url, path, name, count, func):
         """
         这个一个基础下载函数
         """
+        print(count)
         i = self.engineNameList.index(name)
-        
-        self.ms.progressBar_setValue.emit(i, count[0])
+        self.ms.progressBar_setValue.emit(i, count)
 
+        # 增加一个下载值
+        func()
+        
         if self.stopFlag:
             # 减少一个下载线程
             
@@ -339,7 +344,6 @@ class Action:
 
             # 如果所有的线程不在工作, 重置按钮
             if self._allThreadNotWork():
-                self._print('全部已停止,确认下载%d实际下载完成%d' % (count[0], count[1]))
                 self.ms.progressBar_setRange.emit(
                     self.engineNameList.index(name), 0, 0)
                 self.ms.progressBar_setValue.emit(
@@ -348,8 +352,8 @@ class Action:
                 for j in range(self.engineNum):
                     self.progressBarReset(j)
             return -1
-        # 增加一个下载值
-        count[0] = count[0] + 1
+        
+
         try:
             response = requests.get(url, stream=True)  # stream=True必须写上
             size = 0  # 初始化已下载大小
@@ -361,17 +365,13 @@ class Action:
                     for data in response.iter_content(chunk_size=chunk_size):
                         file.write(data)
                         size += len(data)
-                count[1] = count[1] + 1
-                return 200
             else:
                 self._print("%s一个网络错误码" % (path, ))
-                return 2
         except Exception as e:
             self._print(str(e))
         finally:
-            if count[0] >= self.urlNum[i]:
+            if count >= self.urlNum[i]:
                 self._print("%s下载完成" % name)
-                self._print("总数%d实际下载完成%d" % (count[0], count[1]))
                 self.progressBarReset(self.engineNameList.index(name))
                 self._stop_mode()
             return 1
@@ -440,4 +440,13 @@ class Action:
     def _print(self, t):
         self.ms.print.emit(t)
 
+    def openSavepath(self):
+        path = self.ui.savepathLine.text()
+        if ( path == "") or ( path is None):
+            return
+        elif os.path.exists(path):
+            os.startfile(path)
+        else:
+            self._print("%s不存在" % path)
 
+        

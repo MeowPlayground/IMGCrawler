@@ -45,6 +45,7 @@ class MainWindow(QWidget):
         self.ui.startButton.clicked.connect(self.action.start)
         self.ui.stopButton.clicked.connect(self.action.stop)
         self.ui.savepathButton.clicked.connect(self.action.setSavepath)
+        self.ui.openFolderButton.clicked.connect(self.action.openSavepath)
 
         self.ui.keywordLine.textChanged.connect(self.action.keywordTextChanged)
         for i in self.action.checkBoxList:

@@ -25,14 +25,16 @@ class UI(QWidget):
         searchLayout.addWidget(self.searchButton)
 
         # savepath layout
-        self.savepathLine = QLineEdit()
-        self.savepathLine.setEnabled(False)
+        self.savepathLine = QLabel()
         self.savepathButton = QToolButton()
         self.savepathButton.setText('...')
+        self.openFolderButton = QToolButton()
+        self.openFolderButton.setText('^')
         savepathLayout = QHBoxLayout()
         savepathLayout.addWidget(QLabel("保存地址:"))
         savepathLayout.addWidget(self.savepathLine)
         savepathLayout.addWidget(self.savepathButton)
+        savepathLayout.addWidget(self.openFolderButton)
 
         # engine layout
         self.engineLayout = QHBoxLayout()
