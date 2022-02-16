@@ -43,6 +43,7 @@ class DirectLinkCore:
             if id not in tempList:
                 tempList.append(id)
         self.imgList = tempList[:]
+        self.num = len(self.imgList)
 
     def getMaxPage(self):
         """返回最大页数"""

@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel,
                              QLineEdit, QTextBrowser, QToolButton, QHBoxLayout, QVBoxLayout)
 
+from .v import VERSION
 
 class UI(QWidget):
     # def __init__(self):
@@ -11,7 +12,7 @@ class UI(QWidget):
 
     def Init_UI(self, MainWindow):
         # self.setGeometry(300,300,300,200)
-        MainWindow.setWindowTitle('图片爬虫')
+        MainWindow.setWindowTitle('图片爬虫 %s' % VERSION)
         self.formLayout = QVBoxLayout()
 
         # search layout
