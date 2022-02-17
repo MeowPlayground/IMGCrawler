@@ -239,22 +239,7 @@ class Action:
         """
         # 当运行到这个函数时，意味着不同的引擎目前进入了不同的线程
 
-        # 合成当前引擎的目录
-        # 保存目录 + 关键词和引擎名
         
-        path = os.path.join(self.savepath, self.keyword +
-                            '_' + self.engineList[i].name)
-
-        # 如果存在了这个目录，进行文件夹名后面增加 _? 的操作来避免重名
-        if os.path.exists(path):
-            k = 1
-            while os.path.exists(os.path.join(self.savepath, self.keyword + '_' + self.engineList[i].name) + '_' + str(k)):
-                k = k + 1
-            path = os.path.join(self.savepath, self.keyword +
-                                '_' + self.engineList[i].name + '_' + str(k))
-        os.makedirs(path)
-        self._print('创建目录%s' % path)
-
         # 该函数在完成一个页数链接爬取会被调用一次
 
         def _func_whileGetUrl(current):
@@ -300,10 +285,13 @@ class Action:
             return
 
         
-        self._print("引擎%s链接爬取已结束,获得链接%d" %
+        self._print("引擎%s链接爬取已结束,获得链接%d,进行链接去重" %
                     (self.engineList[i].name, self.engineList[i].num))
 
+        self.engineList[i]._removeSame()
 
+        self._print("进行链接去重结束,连接数为%d" %
+                    (self.engineList[i].num))
 
         # 给url数组赋值
         self.urlNum[i] = self.engineList[i].num
@@ -314,6 +302,22 @@ class Action:
         self.ms.progressBar_setValue.emit(
             i, 0)
         
+        # 合成当前引擎的目录
+        # 保存目录 + 关键词和引擎名
+        
+        path = os.path.join(self.savepath, self.keyword +
+                            '_' + self.engineList[i].name)
+
+        # 如果存在了这个目录，进行文件夹名后面增加 _? 的操作来避免重名
+        if os.path.exists(path):
+            k = 1
+            while os.path.exists(os.path.join(self.savepath, self.keyword + '_' + self.engineList[i].name) + '_' + str(k)):
+                k = k + 1
+            path = os.path.join(self.savepath, self.keyword +
+                                '_' + self.engineList[i].name + '_' + str(k))
+        os.makedirs(path)
+        self._print('创建目录%s' % path)
+
 
         try:
             # 引擎保存函数
@@ -329,7 +333,7 @@ class Action:
         """
         这个一个基础下载函数
         """
-        print(count)
+        # print(count)
         i = self.engineNameList.index(name)
         self.ms.progressBar_setValue.emit(i, count)
 
@@ -370,7 +374,7 @@ class Action:
         except Exception as e:
             self._print(str(e))
         finally:
-            if count >= self.urlNum[i]:
+            if count >= (self.urlNum[i] - 1):
                 self._print("%s下载完成" % name)
                 self.progressBarReset(self.engineNameList.index(name))
                 self._stop_mode()
