@@ -1,5 +1,4 @@
 #coding = 'utf-8'
-from tkinter.messagebox import NO
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QWidget
 from functools import partial
